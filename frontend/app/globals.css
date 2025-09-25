@@ -1,0 +1,207 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Import Google Fonts for multilingual support */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Cairo', system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #f8fafc;
+  color: #1e293b;
+  transition: all 0.2s ease;
+}
+
+/* Arabic font support - now using Cairo system-wide */
+[dir="rtl"] {
+  font-family: 'Cairo', system-ui, sans-serif;
+}
+
+[dir="rtl"] * {
+  font-family: 'Cairo', system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom components */
+.chat-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.message-bubble {
+  @apply px-4 py-2 rounded-2xl max-w-xs md:max-w-sm break-words;
+}
+
+.message-sent {
+  @apply bg-blue-500 text-white ml-auto;
+  border-bottom-right-radius: 4px;
+}
+
+.message-received {
+  @apply bg-white text-gray-800 border mr-auto;
+  border-bottom-left-radius: 4px;
+}
+
+.floating-chat-button {
+  @apply fixed bottom-6 right-6 w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center cursor-pointer z-50;
+}
+
+.chat-window {
+  @apply fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border overflow-hidden z-40;
+  max-width: calc(100vw - 2rem);
+}
+
+.typing-indicator {
+  @apply flex space-x-1 px-4 py-2;
+}
+
+.typing-dot {
+  @apply w-2 h-2 bg-gray-400 rounded-full animate-bounce;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .chat-window {
+    @apply fixed inset-4 w-auto h-auto bottom-20;
+  }
+  
+  .floating-chat-button {
+    @apply bottom-4 right-4;
+  }
+}
+
+/* Focus styles for accessibility */
+.focus-outline {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #0f172a;
+    color: #e2e8f0;
+  }
+  
+  .message-received {
+    @apply bg-slate-700 text-gray-100 border-slate-600;
+  }
+  
+  .chat-window {
+    @apply bg-slate-800 border-slate-700;
+  }
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle 2s infinite;
+}
+
+/* Font size utilities */
+.font-sm {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.font-md {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.font-lg {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* Font size specific component adjustments */
+.font-sm .text-sm { font-size: 12px; }
+.font-sm .text-base { font-size: 14px; }
+.font-sm .text-lg { font-size: 16px; }
+.font-sm .text-xl { font-size: 18px; }
+.font-sm .text-2xl { font-size: 20px; }
+
+.font-lg .text-sm { font-size: 16px; }
+.font-lg .text-base { font-size: 18px; }
+.font-lg .text-lg { font-size: 20px; }
+.font-lg .text-xl { font-size: 22px; }
+.font-lg .text-2xl { font-size: 24px; }
+
+/* Font family utilities */
+.font-cairo {
+  font-family: 'Cairo', system-ui, sans-serif;
+}
+
+.font-system {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.font-arial {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+.font-times {
+  font-family: 'Times New Roman', 'Times', serif;
+}
+
+/* Apply font family to all elements when class is on body */
+.font-cairo * {
+  font-family: 'Cairo', system-ui, sans-serif;
+}
+
+.font-system * {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.font-arial * {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+.font-times * {
+  font-family: 'Times New Roman', 'Times', serif;
+}
