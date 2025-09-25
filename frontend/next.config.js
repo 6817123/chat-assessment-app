@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
-    domains: ['api.dicebear.com'], 
+    domains: ['api.dicebear.com'],
   },
 
   env: {
@@ -16,6 +16,7 @@ const nextConfig = {
   },
 
   async rewrites() {
+    // استخدم rewrite المحلي فقط أثناء التطوير
     if (!isProd) {
       return [
         {

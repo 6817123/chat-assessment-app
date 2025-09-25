@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from '@/contexts/NewChatContext'
 import { useLanguage } from '@/contexts/SimpleLanguageContext'
 import { ChatWindow } from './chat/ChatWindow'
