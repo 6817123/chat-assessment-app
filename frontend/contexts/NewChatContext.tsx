@@ -100,6 +100,22 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         return conv
       })
       
+      // If conversation not found, find it by ID and add message anyway
+      const conversationFound = updated.some(c => c.id === conversationId)
+      if (!conversationFound) {
+        console.log('Conversation not found in existing list, creating temporary conversation for message:', conversationId);
+        // Create a temporary conversation to hold the messages
+        const tempConversation: Conversation = {
+          id: conversationId,
+          title: 'New Chat',
+          messages: [message],
+          messageCount: 1,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+        updated.unshift(tempConversation) // Add to beginning of list
+      }
+      
       console.log('Updated conversations after ADD_MESSAGE:', updated.map(c => ({ id: c.id, messageCount: c.messages.length })));
       return { ...state, conversations: updated }
     }
@@ -241,11 +257,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     if (!content.trim() && (!attachments || attachments.length === 0)) return
 
     let conversationId = state.activeConversationId
+    let newConversationCreated = false
 
     try {
       // Create new conversation if none is active
       if (!conversationId) {
         conversationId = await startNewConversation()
+        newConversationCreated = true
         console.log('Created new conversation with ID:', conversationId);
       }
 
@@ -302,15 +320,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         }))
       }
 
-      // Check if this is the first message BEFORE adding messages
-      // Use the conversationId we got (either from state or from startNewConversation)
-      let conversation = state.conversations.find(c => c.id === conversationId)
-      
-      // If conversation not found in state (newly created), we know it's empty
-      const isFirstMessage = !conversation || conversation.messages.length === 0
-
       console.log('About to add messages to conversation:', conversationId);
-      console.log('Conversation found:', !!conversation, 'isFirstMessage:', isFirstMessage);
+      console.log('New conversation created:', newConversationCreated);
 
       // Add messages to state using the correct conversationId
       console.log('Adding user message to conversation:', conversationId, userMessage);
@@ -325,22 +336,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         payload: { conversationId: conversationId!, message: assistantMessage } 
       })
 
-      // Update conversation title if it was the first message
-      if (isFirstMessage) {
+      // Update conversation title if this was a new conversation
+      if (newConversationCreated) {
         try {
           const titleResponse = await chatApiClient.getRandomTitle()
           
-          // Get updated conversation reference after messages were added
-          const updatedConversationBase = state.conversations.find(c => c.id === conversationId)
-          if (updatedConversationBase) {
-            const updatedConversation = { 
-              ...updatedConversationBase, 
+          // Wait a moment for the state to update, then get the conversation
+          setTimeout(() => {
+            dispatch({ type: 'UPDATE_CONVERSATION', payload: {
+              id: conversationId!,
               title: titleResponse.title,
+              messages: [userMessage, assistantMessage],
+              messageCount: 2,
+              createdAt: new Date(),
               updatedAt: new Date()
-            }
-            console.log('Updating conversation title to:', titleResponse.title);
-            dispatch({ type: 'UPDATE_CONVERSATION', payload: updatedConversation })
-          }
+            }})
+          }, 100)
+          
+          console.log('Updating conversation title to:', titleResponse.title);
         } catch (titleError) {
           console.error('Failed to get title:', titleError)
         }
@@ -383,7 +396,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     } finally {
       dispatch({ type: 'SET_IS_THINKING', payload: false })
     }
-  }, [state.activeConversationId, state.conversations, startNewConversation])
+  }, [state.activeConversationId, startNewConversation])
 
   // Chat window actions
   const openChat = useCallback(() => {
