@@ -121,7 +121,7 @@ export function ChatWindow() {
     <Modal
       isOpen={true}
       onClose={closeChat}
-      className="w-full max-w-sm sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl h-[90vh] sm:h-[85vh] lg:h-[80vh] mx-2 sm:mx-4 lg:mx-0 flex flex-col"
+      className="w-full max-w-sm sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl h-[85vh] sm:h-[85vh] lg:h-[80vh] mx-2 sm:mx-4 lg:mx-0 mb-20 sm:mb-4 lg:mb-0 flex flex-col"
       closeOnOverlayClick={false}
     >
       {/* Drag and Drop Overlay */}

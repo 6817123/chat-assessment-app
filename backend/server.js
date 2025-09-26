@@ -5,25 +5,44 @@ const { Server } = require('socket.io');
 const http = require('http');
 require('dotenv').config();
 
+
 // Import routes
 const chatRoutes = require('./routes/chat');
 
 const app = express();
 const server = http.createServer(app);
 
+// Parse CORS origins from environment variables
+const parseOrigins = (v) => (v || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
+const allowedHttp = parseOrigins(process.env.CORS_ORIGIN);
+const allowedSocket = parseOrigins(process.env.SOCKET_CORS_ORIGIN);
+
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.SOCKET_CORS_ORIGIN || "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (allowedSocket.length === 0 || allowedSocket.includes(origin)) return cb(null, true);
+      return cb(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'POST']
   }
 });
+
 
 const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowedHttp.length === 0 || allowedHttp.includes(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 
