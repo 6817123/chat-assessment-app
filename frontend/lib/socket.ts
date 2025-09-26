@@ -8,7 +8,8 @@ class SocketService {
   private readonly maxReconnectAttempts: number = 5;
 
   constructor() {
-    this.url = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+    this.url =
+      process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_SOCKET_URL!;
   }
 
   connect(): Promise<Socket> {

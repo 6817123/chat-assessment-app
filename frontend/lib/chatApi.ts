@@ -2,7 +2,7 @@
 import axios, { AxiosResponse } from "axios";
 
 // Force port 4000 - Backend runs on port 4000
-const API_BASE_URL = "http://localhost:4000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 console.log("🔧 API_BASE_URL set to:", API_BASE_URL);
 
 const api = axios.create({
