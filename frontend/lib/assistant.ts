@@ -1,7 +1,6 @@
 import { AssistantResponse, Message } from "./types";
 import { generateId } from "./utils";
 
-// Mock responses for the assistant
 const ASSISTANT_RESPONSES = {
   en: [
     "Hello! How can I help you today?",
@@ -29,7 +28,6 @@ const ASSISTANT_RESPONSES = {
   ],
 };
 
-// File-specific responses
 const FILE_RESPONSES = {
   en: {
     image:
@@ -49,7 +47,6 @@ const FILE_RESPONSES = {
   },
 };
 
-// Greeting responses
 const GREETING_RESPONSES = {
   en: [
     "Hello! Welcome to our chat assistant. How may I help you today?",
@@ -65,39 +62,33 @@ const GREETING_RESPONSES = {
   ],
 };
 
-// Simulate network delay
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Generate assistant response based on user message
 export async function generateAssistantResponse(
   userMessage: Message,
   language: "en" | "ar" = "en",
   isFirstMessage: boolean = false
 ): Promise<AssistantResponse> {
-  // Simulate thinking time (1.5-3 seconds)
   const thinkingTime = Math.random() * 1500 + 1500;
   await delay(thinkingTime);
 
-  // Safely read user text from either .text or .content (for backward compatibility)
-  const userText: string =
-    (userMessage as any)?.text ?? (userMessage as any)?.content ?? "";
+  const userText: string = (
+    (userMessage as any)?.text ??
+    (userMessage as any)?.content ??
+    ""
+  ).toString();
 
   let content: string;
 
-  // First message gets a greeting
   if (isFirstMessage) {
     const greetings = GREETING_RESPONSES[language];
     content = greetings[Math.floor(Math.random() * greetings.length)];
-  }
-  // Handle messages with attachments
-  else if (userMessage.attachments && userMessage.attachments.length > 0) {
+  } else if (userMessage.attachments && userMessage.attachments.length > 0) {
     const attachmentType = userMessage.attachments[0]
       .type as keyof (typeof FILE_RESPONSES)["en"];
     content = FILE_RESPONSES[language][attachmentType];
-
-    // Add comment about the text if there's also text content
     if (typeof userText === "string" && userText.trim()) {
       const textComment =
         language === "en"
@@ -105,13 +96,9 @@ export async function generateAssistantResponse(
           : ` أيضاً، بخصوص رسالتك: "${userText}" - أجد ذلك مثيراً للاهتمام!`;
       content += textComment;
     }
-  }
-  // Handle text-only messages
-  else {
+  } else {
     const responses = ASSISTANT_RESPONSES[language];
     content = responses[Math.floor(Math.random() * responses.length)];
-
-    // Add echo of user message occasionally
     if (
       Math.random() > 0.7 &&
       typeof userText === "string" &&
@@ -133,7 +120,6 @@ export async function generateAssistantResponse(
   };
 }
 
-// Generate conversation title based on first user message
 export function generateConversationTitle(
   firstMessage: string,
   language: "en" | "ar" = "en"
@@ -141,7 +127,6 @@ export function generateConversationTitle(
   const maxLength = 30;
   let title = firstMessage.trim();
 
-  // Remove common starting words
   const commonStarts =
     language === "en"
       ? [
@@ -171,12 +156,10 @@ export function generateConversationTitle(
     title = title.replace(regex, "");
   });
 
-  // Truncate if too long
   if (title.length > maxLength) {
     title = title.substring(0, maxLength).trim() + "...";
   }
 
-  // Fallback titles
   if (title.length < 3) {
     title = language === "en" ? "New conversation" : "محادثة جديدة";
   }
@@ -184,7 +167,6 @@ export function generateConversationTitle(
   return title;
 }
 
-// Simulate error scenarios for testing
 export async function simulateError(
   errorType: "network" | "timeout" | "server"
 ): Promise<never> {
@@ -203,13 +185,11 @@ export async function simulateError(
     },
   };
 
-  // Simulate network delay before error
   await delay(Math.random() * 2000 + 1000);
 
   throw new Error(errorMessages[errorType].en);
 }
 
-// Get random motivational message for empty state
 export function getEmptyStateMessage(language: "en" | "ar" = "en"): string {
   const messages = {
     en: [
