@@ -2,18 +2,25 @@
 import axios, { AxiosResponse } from "axios";
 
 // Fix environment variable handling with fallback
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
-  (process.env.NODE_ENV === 'production' 
-    ? 'https://chat-assessment-app-production.up.railway.app' 
-    : 'http://localhost:4000');
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://chat-assessment-app-production.up.railway.app"
+    : "http://localhost:4000");
 
 console.log("🔧 API_BASE_URL set to:", API_BASE_URL);
 console.log("🔧 NODE_ENV:", process.env.NODE_ENV);
-console.log("🔧 NEXT_PUBLIC_API_URL from env:", process.env.NEXT_PUBLIC_API_URL);
+console.log(
+  "🔧 NEXT_PUBLIC_API_URL from env:",
+  process.env.NEXT_PUBLIC_API_URL
+);
 
 // Add production warning
-if (process.env.NODE_ENV === 'production' && API_BASE_URL.includes('localhost')) {
-  console.error('❌ PRODUCTION ERROR: API_BASE_URL still points to localhost!');
+if (
+  process.env.NODE_ENV === "production" &&
+  API_BASE_URL.includes("localhost")
+) {
+  console.error("❌ PRODUCTION ERROR: API_BASE_URL still points to localhost!");
 }
 
 const api = axios.create({

@@ -9,18 +9,27 @@ class SocketService {
 
   constructor() {
     // Fix environment variable handling with fallback
-    this.url = process.env.NEXT_PUBLIC_SOCKET_URL || 
-      (process.env.NODE_ENV === 'production' 
-        ? 'https://chat-assessment-app-production.up.railway.app' 
-        : 'http://localhost:4000');
-    
+    this.url =
+      process.env.NEXT_PUBLIC_SOCKET_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://chat-assessment-app-production.up.railway.app"
+        : "http://localhost:4000");
+
     console.log("🔧 SOCKET_URL set to:", this.url);
     console.log("🔧 NODE_ENV:", process.env.NODE_ENV);
-    console.log("🔧 NEXT_PUBLIC_SOCKET_URL from env:", process.env.NEXT_PUBLIC_SOCKET_URL);
-    
+    console.log(
+      "🔧 NEXT_PUBLIC_SOCKET_URL from env:",
+      process.env.NEXT_PUBLIC_SOCKET_URL
+    );
+
     // Add production warning
-    if (process.env.NODE_ENV === 'production' && this.url.includes('localhost')) {
-      console.error('❌ PRODUCTION ERROR: SOCKET_URL still points to localhost!');
+    if (
+      process.env.NODE_ENV === "production" &&
+      this.url.includes("localhost")
+    ) {
+      console.error(
+        "❌ PRODUCTION ERROR: SOCKET_URL still points to localhost!"
+      );
     }
   }
 
