@@ -104,7 +104,12 @@ app.use((err, req, res, next) => {
     error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
 });
-
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend is running — Welcome to Chat Assessment API!'
+  });
+});
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
