@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useLanguage } from "@/contexts/SimpleLanguageContext";
+import { detectLanguage, getVoiceConfig, findBestVoice } from "@/lib/languageDetection";
 
 export interface TTSOptions {
   voice?: SpeechSynthesisVoice;
@@ -54,10 +55,20 @@ export function useTTS(): UseTTSReturn {
     };
   }, [isSupported]);
 
+  const getPreferredVoiceForText = (text: string): SpeechSynthesisVoice | null => {
+    if (voices.length === 0) return null;
+
+    // Detect the language of the text automatically
+    const detectedLang = detectLanguage(text);
+    
+    // Find the best voice for the detected language
+    return findBestVoice(voices, detectedLang);
+  };
+
   const getPreferredVoice = (): SpeechSynthesisVoice | null => {
     if (voices.length === 0) return null;
 
-    // Try to find a voice that matches the current language
+    // Try to find a voice that matches the current language (fallback method)
     const languageCode = language === "ar" ? "ar" : "en";
 
     // First, look for exact language match
@@ -113,8 +124,12 @@ export function useTTS(): UseTTSReturn {
         setTimeout(() => {
           const utterance = new SpeechSynthesisUtterance(text);
 
-          // Set voice
-          const voice = options.voice || getPreferredVoice();
+          // Detect language of the text and get appropriate voice
+          const detectedLang = detectLanguage(text);
+          const voiceConfig = getVoiceConfig(detectedLang);
+
+          // Set voice based on detected language (prioritize text language over user preference)
+          const voice = options.voice || getPreferredVoiceForText(text);
           if (voice) {
             utterance.voice = voice;
           }
@@ -124,8 +139,8 @@ export function useTTS(): UseTTSReturn {
           utterance.pitch = options.pitch ?? 1.0;
           utterance.volume = options.volume ?? 0.8;
 
-          // Set language based on current app language
-          utterance.lang = language === "ar" ? "ar-SA" : "en-US";
+          // Set language based on detected text language (not app language)
+          utterance.lang = voiceConfig.locale;
 
           // Track if speech ended normally
           let hasEnded = false;
@@ -134,6 +149,8 @@ export function useTTS(): UseTTSReturn {
           utterance.onstart = () => {
             setIsSpeaking(true);
             setError(null);
+            // Log the detected language for debugging
+            console.log(`TTS started for ${detectedLang} text: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
           };
 
           utterance.onend = () => {

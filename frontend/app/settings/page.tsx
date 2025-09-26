@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/SimpleLanguageContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -14,15 +14,20 @@ export default function SettingsPage() {
   const { t, direction, setLanguage, language } = useLanguage()
   const { theme, setTheme } = useTheme()
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const handleLanguageChange = (newLanguage: 'en' | 'ar') => {
     updateSetting('language', newLanguage)
-    setLanguage(newLanguage) // تحديث اللغة فوراً
+    setLanguage(newLanguage) 
   }
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     updateSetting('theme', newTheme)
-    setTheme(newTheme) // تحديث الـ theme فوراً
+    setTheme(newTheme)
   }
 
   const handleFontSizeChange = (fontSize: 'sm' | 'md' | 'lg') => {
@@ -450,6 +455,12 @@ export default function SettingsPage() {
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t('settings.descriptions.tts')}
+                        <div className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
+                          {direction === 'rtl' ? 
+                            '✨ كشف تلقائي للغة النص (عربي/إنجليزي)' : 
+                            '✨ Automatic language detection (Arabic/English)'
+                          }
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -465,7 +476,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Notifications */}
+              {/* thinking */}
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 sm:p-5">
                 <div className={cn(
                   'flex items-start justify-between gap-4',
@@ -554,15 +565,6 @@ export default function SettingsPage() {
                       </svg>
                       <span>{t('settings.resetAll')}</span>
                     </div>
-                    <div className={cn(
-                      'flex items-center justify-center gap-2',
-                      direction === 'rtl' && 'flex-row-reverse'
-                    )}>
-                      {/* <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      <span>{t('settings.resetAll')}</span> */}
-                    </div>
                   </button>
                 </div>
               </div>
@@ -572,7 +574,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Reset Confirmation Modal */}
-      {showResetConfirm && (
+      {isMounted && showResetConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
             <div className={cn(
