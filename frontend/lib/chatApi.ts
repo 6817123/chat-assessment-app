@@ -114,6 +114,19 @@ export const chatApiClient = {
   },
 
   async createConversation(title?: string): Promise<BackendConversation> {
+    // If no title provided, get one from the /title endpoint
+    if (!title) {
+      try {
+        const titleResponse = await import("./api").then((module) =>
+          module.getTitleFromEndpoint()
+        );
+        title = titleResponse.title;
+      } catch (error) {
+        console.error("Failed to get title from endpoint:", error);
+        title = "New Chat"; // fallback
+      }
+    }
+
     const response = await api.post("/chat/conversations", { title });
     return response.data.success ? response.data.data : response.data;
   },
@@ -121,6 +134,23 @@ export const chatApiClient = {
   async getConversation(id: string): Promise<BackendConversation> {
     const response = await api.get(`/chat/conversations/${id}`);
     return response.data.success ? response.data.data : response.data;
+  },
+
+  async deleteConversation(id: string): Promise<void> {
+    try {
+      const response = await api.delete(`/chat/conversations/${id}`);
+
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to delete conversation"
+        );
+      }
+
+      console.log(`✅ Conversation ${id} deleted successfully`);
+    } catch (error) {
+      console.error("❌ Error deleting conversation:", error);
+      throw error;
+    }
   },
 
   // Messages

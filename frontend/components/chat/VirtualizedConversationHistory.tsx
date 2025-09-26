@@ -40,10 +40,17 @@ export function VirtualizedConversationHistory({
     onConversationSelect(conversation.id)
   }
 
-  const handleDeleteConversation = (e: React.MouseEvent, conversationId: string) => {
+  const handleDeleteConversation = async (e: React.MouseEvent, conversationId: string) => {
     e.stopPropagation()
+    
     if (confirm(t('chat.confirm.delete'))) {
-      deleteConversation(conversationId)
+      try {
+        await deleteConversation(conversationId)
+      } catch (error) {
+        console.error('Failed to delete conversation:', error)
+        // Show user-friendly error message
+        alert(t('chat.error.delete') || 'Failed to delete conversation. Please try again.')
+      }
     }
   }
 

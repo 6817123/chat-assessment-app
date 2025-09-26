@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useLanguage } from "@/contexts/SimpleLanguageContext";
-import { detectLanguage, getVoiceConfig, findBestVoice } from "@/lib/languageDetection";
+import {
+  detectLanguage,
+  getVoiceConfig,
+  findBestVoice,
+} from "@/lib/languageDetection";
 
 export interface TTSOptions {
   voice?: SpeechSynthesisVoice;
@@ -55,12 +59,14 @@ export function useTTS(): UseTTSReturn {
     };
   }, [isSupported]);
 
-  const getPreferredVoiceForText = (text: string): SpeechSynthesisVoice | null => {
+  const getPreferredVoiceForText = (
+    text: string
+  ): SpeechSynthesisVoice | null => {
     if (voices.length === 0) return null;
 
     // Detect the language of the text automatically
     const detectedLang = detectLanguage(text);
-    
+
     // Find the best voice for the detected language
     return findBestVoice(voices, detectedLang);
   };
@@ -150,7 +156,11 @@ export function useTTS(): UseTTSReturn {
             setIsSpeaking(true);
             setError(null);
             // Log the detected language for debugging
-            console.log(`TTS started for ${detectedLang} text: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
+            console.log(
+              `TTS started for ${detectedLang} text: "${text.substring(0, 50)}${
+                text.length > 50 ? "..." : ""
+              }"`
+            );
           };
 
           utterance.onend = () => {

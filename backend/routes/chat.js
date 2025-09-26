@@ -377,6 +377,46 @@ router.post('/conversations', (req, res) => {
   }
 });
 
+// DELETE /api/chat/conversations/:id - Delete conversation
+router.delete('/conversations/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if conversation exists
+    if (!conversations.has(id)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+    
+    // Delete conversation from in-memory store
+    conversations.delete(id);
+    
+    // Also delete related messages
+    const conversationMessages = Array.from(messages.values()).filter(
+      msg => msg.conversationId === id
+    );
+    
+    conversationMessages.forEach(msg => {
+      messages.delete(msg.id);
+    });
+    
+    console.log(`Conversation ${id} deleted successfully`);
+    
+    res.json({
+      success: true,
+      message: 'Conversation deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete conversation'
+    });
+  }
+});
+
 // GET /api/chat/health - Health check endpoint
 router.get('/health', (req, res) => {
   res.json({

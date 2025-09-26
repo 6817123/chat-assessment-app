@@ -247,10 +247,26 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [state.conversations])
 
   // Delete a conversation
-  const deleteConversation = useCallback((conversationId: string) => {
-    // For now, only remove from local state since backend doesn't have delete endpoint
-    dispatch({ type: 'DELETE_CONVERSATION', payload: conversationId })
-  }, [])
+  const deleteConversation = useCallback(async (conversationId: string) => {
+    try {
+      // Call backend API to delete conversation
+      await chatApiClient.deleteConversation(conversationId);
+      
+      // Remove from local state only after successful API call
+      dispatch({ type: 'DELETE_CONVERSATION', payload: conversationId });
+      
+      // If the deleted conversation was active, clear active conversation
+      if (state.activeConversationId === conversationId) {
+        dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: null });
+      }
+      
+      console.log(`✅ Conversation ${conversationId} deleted successfully`);
+    } catch (error) {
+      console.error('❌ Failed to delete conversation:', error);
+      // Optionally show user error message here
+      throw error; // Re-throw so UI can handle it
+    }
+  }, [state.activeConversationId])
 
   // Send a message
   const sendMessage = useCallback(async (content: string, attachments?: Attachment[]) => {
