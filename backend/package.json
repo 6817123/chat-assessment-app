@@ -1,7 +1,7 @@
 {
   "name": "chat-assessment-backend",
   "version": "1.0.0",
-  "description": "Backend server for chat assessment application",
+  "description": "Echo assistant backend (in-memory) for chat assessment application",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,8 +11,9 @@
   "keywords": [
     "chat",
     "express",
-    "socket.io",
-    "mongodb"
+    "echo",
+    "assistant",
+    "in-memory"
   ],
   "author": "",
   "license": "ISC",
@@ -21,10 +22,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.18.2",
-    "mongoose": "^8.0.3",
-    "morgan": "^1.10.1",
-    "multer": "^1.4.5-lts.1",
-    "socket.io": "^4.7.5"
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

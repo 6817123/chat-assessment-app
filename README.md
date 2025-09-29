@@ -1,10 +1,12 @@
 # Chat Assessment – Real-Time Chat Application
 
-A modern chat application built with **Next.js 14 (TypeScript)** and **Node.js/Express**, featuring real-time messaging, multilingual support, and advanced user experience features.
+A modern chat application built with **Next.js 14 (TypeScript)** and **Node.js/Express**, featuring conversational (user ↔ assistant) messaging, multilingual support, and advanced user experience features.
+
+> Simplification Notice (2025-09): The previous experimental two-user direct messaging layer (Mongoose `User`/`Message` models, Socket.IO events, and related routes `/api/messages`, `/api/users`) has been fully removed per updated requirements. The backend now implements only an in-memory assistant chat stored under `/api/chat/*` without any persistent database or realtime WebSocket layer.
 
 ## 🚀 Features
 
-- **Real-time messaging** with conversation history
+- **Conversational assistant messaging** with history (in-memory)
 - **File attachments**: images, documents, audio
 - **Voice recording** with start/pause/resume/stop controls
 - **Text-to-Speech (TTS)** with English & Arabic support
@@ -18,7 +20,7 @@ A modern chat application built with **Next.js 14 (TypeScript)** and **Node.js/E
 ## 🛠 Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Context API
-- **Backend**: Node.js, Express.js (in-memory store, no DB required)
+- **Backend**: Node.js, Express.js (in-memory store only, no DB, no Socket.IO)
 - **Utilities**: Multer (file upload), MediaRecorder API (voice), Headless UI
 
 ## ⚙️ Setup
@@ -43,8 +45,47 @@ npm run dev
 
 ## 📦 Storage
 
-- **Conversations & messages**: handled by backend (in-memory)
+- **Conversations & messages**: in-memory on backend (ephemeral – reset on restart)
 - **Settings (language, theme, font, toggles)**: stored in localStorage
+
+### Removed Components
+
+- Socket.IO realtime layer
+- Mongoose models (`User.js`, `Message.js`)
+- REST routes: `/api/messages/*`, `/api/users/*`
+- Per-user online/offline presence tracking
+
+All references to sender/receiver user IDs have been replaced with a simple `sender: 'user' | 'assistant'` shape used only within the assistant conversation context.
+
+## 🧱 Backend Architecture (Refactored)
+
+Layered structure for clarity and testability:
+
+```
+backend/
+   server.js                # Express app bootstrap (mounts /api/chat)
+   routes/
+      chat.js                # Route definitions only
+   controllers/
+      chatController.js      # Request handlers (Echo logic, pagination, CRUD)
+   services/
+      chatStore.js           # In-memory store (conversations + messages)
+   utils/
+      chatUtils.js           # Helper utilities (ids, titles, thinking text, delay, attachments)
+   middleware/
+      upload.js              # Multer config (memory storage + validation)
+```
+
+### Echo Logic Specification
+
+1. Client sends message (text and/or attachments) with optional `conversationId`.
+2. API immediately accepts request, waits ~2 seconds (simulated thinking) inside controller.
+3. Two messages are produced and appended (if conversation exists):
+   - User message: exact original text + attachments.
+   - Assistant message: `Echo: <original text>` (or `Echo: Attachment received` when only files) and mirrors attachments.
+4. Both messages returned in payload `{ userMessage, assistantMessage }`.
+
+No persistence beyond process memory; restart clears everything. This matches assessment constraints and removes all prior two-user chat remnants.
 
 ## ✅ Assessment Coverage
 
