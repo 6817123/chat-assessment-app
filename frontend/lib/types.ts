@@ -1,11 +1,3 @@
-// Core types for the chat system
-export interface User {
-  id: string;
-  name: string;
-  avatar?: string;
-  isOnline: boolean;
-}
-
 export interface Message {
   id: string;
   text: string;
@@ -22,15 +14,15 @@ export interface Attachment {
   url: string;
   size: number;
   mimeType: string;
-  preview?: string; // For image thumbnails
-  file?: File; // Original file object for uploading
+  preview?: string;
+  file?: File;
 }
 
 export interface Conversation {
   id: string;
   title: string;
   messages: Message[];
-  messageCount?: number; // Number of messages from backend
+  messageCount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,7 +56,6 @@ export interface ThemeState {
   resolvedTheme: "light" | "dark";
 }
 
-// Translation interface
 export interface Translations {
   [key: string]: {
     en: string;
@@ -72,7 +63,6 @@ export interface Translations {
   };
 }
 
-// File upload types
 export interface FileUploadState {
   files: File[];
   previews: string[];
@@ -81,7 +71,6 @@ export interface FileUploadState {
   error: string | null;
 }
 
-// API response types
 export interface AssistantResponse {
   content: string;
   delay?: number;

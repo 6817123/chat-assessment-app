@@ -11,14 +11,12 @@ interface ConversationHistoryProps {
   className?: string
 }
 
-// Threshold for using virtualized scrolling
 const VIRTUALIZATION_THRESHOLD = 50
 
 export function ConversationHistory({ onConversationSelect, className }: ConversationHistoryProps) {
   const { conversations, activeConversationId, deleteConversation } = useChat()
   const { t, direction } = useLanguage()
 
-  // Use virtualized version for large lists
   if (conversations.length > VIRTUALIZATION_THRESHOLD) {
     return (
       <VirtualizedConversationHistory
@@ -42,7 +40,6 @@ export function ConversationHistory({ onConversationSelect, className }: Convers
         await deleteConversation(conversationId)
       } catch (error) {
         console.error('Failed to delete conversation:', error)
-        // Show user-friendly error message
         alert(t('chat.error.delete') || 'Failed to delete conversation. Please try again.')
       }
     }

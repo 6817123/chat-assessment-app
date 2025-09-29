@@ -1,12 +1,12 @@
 # Chat Assessment – Real-Time Chat Application
 
-A modern chat application built with **Next.js 14 (TypeScript)** and **Node.js/Express**, featuring conversational (user ↔ assistant) messaging, multilingual support, and advanced user experience features.
+A modern chat application built with **Next.js 14 (TypeScript)** and **Node.js/Express**, featuring single-user ↔ assistant messaging, multilingual support, and advanced user experience features.
 
-> Simplification Notice (2025-09): The previous experimental two-user direct messaging layer (Mongoose `User`/`Message` models, Socket.IO events, and related routes `/api/messages`, `/api/users`) has been fully removed per updated requirements. The backend now implements only an in-memory assistant chat stored under `/api/chat/*` without any persistent database or realtime WebSocket layer.
+> Simplification Notice (2025-09): The previous experimental two-user direct messaging layer (Mongoose `User`/`Message` models, Socket.IO events, and related routes `/api/messages`, `/api/users`) has been fully removed per updated requirements. The backend now implements only an in-memory assistant chat under `/api/chat/*` without any persistent database or realtime WebSocket layer.
 
 ## 🚀 Features
 
-- **Conversational assistant messaging** with history (in-memory)
+- **Conversational assistant messaging** (single user ↔ assistant) with history (in-memory)
 - **File attachments**: images, documents, audio
 - **Voice recording** with start/pause/resume/stop controls
 - **Text-to-Speech (TTS)** with English & Arabic support
@@ -20,7 +20,7 @@ A modern chat application built with **Next.js 14 (TypeScript)** and **Node.js/E
 ## 🛠 Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Context API
-- **Backend**: Node.js, Express.js (in-memory store only, no DB, no Socket.IO)
+- **Backend**: Node.js, Express.js (in-memory store only; no DB; no Socket.IO)
 - **Utilities**: Multer (file upload), MediaRecorder API (voice), Headless UI
 
 ## ⚙️ Setup
@@ -48,12 +48,15 @@ npm run dev
 - **Conversations & messages**: in-memory on backend (ephemeral – reset on restart)
 - **Settings (language, theme, font, toggles)**: stored in localStorage
 
-### Removed Components
+### Removed Components / Legacy Eliminated
 
 - Socket.IO realtime layer
 - Mongoose models (`User.js`, `Message.js`)
 - REST routes: `/api/messages/*`, `/api/users/*`
 - Per-user online/offline presence tracking
+- Multi-user selection UI (`UserSelection` component)
+- Client socket service (`lib/socket.ts`)
+- Random assistant generators (replaced by deterministic echo logic)
 
 All references to sender/receiver user IDs have been replaced with a simple `sender: 'user' | 'assistant'` shape used only within the assistant conversation context.
 
@@ -67,7 +70,7 @@ backend/
    routes/
       chat.js                # Route definitions only
    controllers/
-      chatController.js      # Request handlers (Echo logic, pagination, CRUD)
+      chatController.js      # Request handlers (echo logic, pagination, CRUD)
    services/
       chatStore.js           # In-memory store (conversations + messages)
    utils/
@@ -86,6 +89,20 @@ backend/
 4. Both messages returned in payload `{ userMessage, assistantMessage }`.
 
 No persistence beyond process memory; restart clears everything. This matches assessment constraints and removes all prior two-user chat remnants.
+
+### Frontend Data & Type Layer Separation
+
+```
+frontend/
+   lib/
+      chatApi.ts      # Pure HTTP client (axios) only – no type/interface declarations
+      apiTypes.ts     # Transport-level DTO types that mirror backend payloads
+      types.ts        # UI/domain types (Message, Conversation, Settings, etc.)
+   types/
+      index.ts        # Re-export surface for UI/domain types + ApiResponse
+```
+
+Rationale: Each file now contains a single responsibility—`chatApi.ts` focuses exclusively on making requests & handling responses; shared DTO interfaces live in `apiTypes.ts`; UI-specific enriched types (e.g., `Date` objects, local state flags) remain in `types.ts`.
 
 ## ✅ Assessment Coverage
 
@@ -213,7 +230,7 @@ npm run dev
 1. **Create Multiple Conversations**:
    - Create 5-6 different conversations
    - Add messages to each
-2. **Delete Conversation** (NEW FEATURE):
+2. **Delete Conversation**:
    - Click ❌ delete button on any conversation
    - **Expected**: Confirmation dialog appears
    - Click "OK" → conversation deleted from backend
@@ -301,6 +318,7 @@ curl -X POST http://localhost:4000/api/chat \
 - **In-Memory Storage**: Follows assessment requirements exactly
 - **TypeScript Throughout**: Complete type safety and development experience
 - **Modular Components**: Highly reusable and maintainable code structure
+  -- **Clear Type Boundaries**: Transport (apiTypes) vs UI domain (types) vs client logic (chatApi)
 - **Custom Hooks**: Clean separation of concerns and business logic
 
 ### **Performance Optimizations**

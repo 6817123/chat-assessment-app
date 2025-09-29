@@ -383,7 +383,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<'en' | 'ar'>('en')
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr')
 
-  // Load saved language from localStorage
   useEffect(() => {
     const savedLanguage = localStorage.getItem('chat-language') as 'en' | 'ar' | null
     if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
@@ -392,12 +391,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Update document direction and language
   useEffect(() => {
     document.documentElement.dir = direction
     document.documentElement.lang = language
     
-    // Update body class for styling
     if (direction === 'rtl') {
       document.body.classList.add('rtl')
       document.body.classList.remove('ltr')
@@ -417,7 +414,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setDirection(lang === 'ar' ? 'rtl' : 'ltr')
     localStorage.setItem('chat-language', lang)
     
-    // Dispatch custom event to notify other components
     window.dispatchEvent(new Event('languageChanged'))
   }
 

@@ -30,23 +30,16 @@ export function ChatWindow() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const dragCounter = useRef(0)
 
-  // Get active conversation
   const activeConversation = conversations.find(c => c.id === activeConversationId)
   const messages = activeConversation?.messages || []
   
-  // Debug logging
-  console.log('ChatWindow render - activeConversationId:', activeConversationId);
-  console.log('ChatWindow render - activeConversation:', activeConversation);
-  console.log('ChatWindow render - messages count:', messages.length);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, isThinking])
 
-  // Clear error after 5 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(clearError, 5000)
@@ -54,7 +47,6 @@ export function ChatWindow() {
     }
   }, [error, clearError])
 
-  // Handle drag and drop events
   useEffect(() => {
     const handleDragEnter = (e: DragEvent) => {
       e.preventDefault()
@@ -90,7 +82,6 @@ export function ChatWindow() {
       
       const files = e.dataTransfer?.files
       if (files && files.length > 0) {
-        // Create a custom event to pass files to MessageInput
         const fileDropEvent = new CustomEvent('filesDrop', {
           detail: { files: Array.from(files) }
         })

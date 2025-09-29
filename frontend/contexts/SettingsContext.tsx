@@ -45,7 +45,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(defaultSettings)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load settings from localStorage on mount
   useEffect(() => {
     try {
       const savedSettings = localStorage.getItem(STORAGE_KEY)
@@ -55,7 +54,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         parsedSettings = { ...defaultSettings, ...JSON.parse(savedSettings) }
       }
       
-      // Check if language is stored separately in SimpleLanguageContext
       const simpleLanguage = localStorage.getItem('chat-language') as 'en' | 'ar' | null
       if (simpleLanguage && (simpleLanguage === 'en' || simpleLanguage === 'ar')) {
         parsedSettings.language = simpleLanguage
@@ -69,7 +67,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Listen for language changes from SimpleLanguageContext
   useEffect(() => {
     const handleLanguageChange = () => {
       const simpleLanguage = localStorage.getItem('chat-language') as 'en' | 'ar' | null
@@ -81,10 +78,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Listen for storage changes
     window.addEventListener('storage', handleLanguageChange)
     
-    // Also listen for custom language change events
     window.addEventListener('languageChanged', handleLanguageChange)
 
     return () => {
@@ -93,7 +88,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Listen for theme changes from ThemeContext/lib/storage
   useEffect(() => {
     const handleThemeChange = () => {
       try {
@@ -112,10 +106,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Listen for storage changes
     window.addEventListener('storage', handleThemeChange)
     
-    // Also listen for custom theme change events
     window.addEventListener('themeChanged', handleThemeChange)
 
     return () => {
@@ -124,7 +116,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Save settings to localStorage whenever they change
   useEffect(() => {
     if (!isLoading) {
       try {
@@ -135,21 +126,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [settings, isLoading])
 
-  // Apply theme changes to document
   useEffect(() => {
     if (!isLoading) {
       applyTheme(settings.theme)
     }
   }, [settings.theme, isLoading])
 
-  // Apply font size changes to document
   useEffect(() => {
     if (!isLoading) {
       applyFontSize(settings.fontSize)
     }
   }, [settings.fontSize, isLoading])
 
-  // Apply font family changes to document
   useEffect(() => {
     if (!isLoading) {
       applyFontFamily(settings.fontFamily)
@@ -170,20 +158,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const applyFontSize = (fontSize: 'sm' | 'md' | 'lg') => {
     const body = document.body
     
-    // Remove existing font size classes
     body.classList.remove('font-sm', 'font-md', 'font-lg')
     
-    // Add new font size class
     body.classList.add(`font-${fontSize}`)
   }
 
   const applyFontFamily = (fontFamily: 'cairo' | 'system' | 'arial' | 'times') => {
     const body = document.body
     
-    // Remove existing font family classes
     body.classList.remove('font-cairo', 'font-system', 'font-arial', 'font-times')
     
-    // Add new font family class
     body.classList.add(`font-${fontFamily}`)
   }
 
@@ -211,7 +195,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setSettings(defaultSettings)
   }
 
-  // Listen for system theme changes when theme is set to 'system'
   useEffect(() => {
     if (settings.theme === 'system' && !isLoading) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')

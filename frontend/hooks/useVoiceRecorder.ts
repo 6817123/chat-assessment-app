@@ -92,7 +92,6 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
         setAudioUrl(URL.createObjectURL(blob));
         setRecordingState("stopped");
 
-        // Stop all tracks to release microphone
         stream.getTracks().forEach((track) => track.stop());
         setAudioStream(null);
       };
@@ -105,7 +104,7 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
         setRecordingState("recording");
       };
 
-      mediaRecorder.start(100); // Collect data every 100ms
+      mediaRecorder.start(100);
       startTimeRef.current = Date.now();
       pausedTimeRef.current = 0;
       setDuration(0);
@@ -161,7 +160,6 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
     }
   }, [audioUrl]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (audioUrl) {

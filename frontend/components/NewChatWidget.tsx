@@ -12,7 +12,6 @@ export default function ChatWidget() {
   const [isHovered, setIsHovered] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
 
-  // Trigger animation on mount
   useEffect(() => {
     const timer = setTimeout(() => setIsAnimating(true), 1000)
     return () => clearTimeout(timer)

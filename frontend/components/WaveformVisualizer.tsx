@@ -57,12 +57,10 @@ export function WaveformVisualizer({
       
       canvasCtx.clearRect(0, 0, width, height)
       
-      // Draw waveform bars
       const barWidth = width / bufferLength * 2.5
       let barHeight
       let x = 0
       
-      // Use blue gradient
       const gradient = canvasCtx.createLinearGradient(0, 0, 0, height)
       gradient.addColorStop(0, '#3b82f6')
       gradient.addColorStop(1, '#1d4ed8')
@@ -100,7 +98,6 @@ export function WaveformVisualizer({
     
     canvasCtx.clearRect(0, 0, width, height)
     
-    // Draw flat line in center
     canvasCtx.strokeStyle = '#6b7280'
     canvasCtx.lineWidth = 2
     canvasCtx.beginPath()

@@ -33,7 +33,7 @@ async function postChat(req, res) {
 
     const assistantMessage = {
       id: generateId(),
-      text: `Echo: ${text || (attachments.length ? 'Attachment received' : '')}`.trim(),
+      text: (text || (attachments.length ? 'Attachment received' : '')).trim(),
       attachments: attachments.map(a => ({ ...a })),
       timestamp: new Date().toISOString(),
       sender: 'assistant',

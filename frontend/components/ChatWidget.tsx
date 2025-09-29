@@ -19,7 +19,6 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Chat Window */}
       {isOpen && <ChatWindow />}
 
       {/* Floating Chat Button */}

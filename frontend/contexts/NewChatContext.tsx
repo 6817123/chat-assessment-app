@@ -7,20 +7,16 @@ import { chatApiClient } from '@/lib/chatApi'
 import { useLanguage } from './SimpleLanguageContext'
 
 interface ChatContextType extends ChatState {
-  // Conversation actions
   startNewConversation: () => Promise<string>
   selectConversation: (conversationId: string | null) => void
   deleteConversation: (conversationId: string) => void
   
-  // Message actions
   sendMessage: (content: string, attachments?: Attachment[]) => Promise<void>
   
-  // Chat window actions
   openChat: () => void
   closeChat: () => void
   toggleChat: () => void
   
-  // Utility
   clearError: () => void
 }
 
@@ -100,11 +96,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         return conv
       })
       
-      // If conversation not found, find it by ID and add message anyway
       const conversationFound = updated.some(c => c.id === conversationId)
       if (!conversationFound) {
-        console.log('Conversation not found in existing list, creating temporary conversation for message:', conversationId);
-        // Create a temporary conversation to hold the messages
         const tempConversation: Conversation = {
           id: conversationId,
           title: 'New Chat',
@@ -113,10 +106,9 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
           createdAt: new Date(),
           updatedAt: new Date()
         }
-        updated.unshift(tempConversation) // Add to beginning of list
+        updated.unshift(tempConversation) 
       }
       
-      console.log('Updated conversations after ADD_MESSAGE:', updated.map(c => ({ id: c.id, messageCount: c.messages.length })));
       return { ...state, conversations: updated }
     }
     
@@ -134,26 +126,23 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(chatReducer, initialState)
   const { language } = useLanguage()
 
-  // Load conversations and active conversation on mount
   useEffect(() => {
     const loadConversations = async () => {
       try {
         dispatch({ type: 'SET_IS_THINKING', payload: true })
         console.log('Loading conversations...');
         const conversations = await chatApiClient.getConversations()
-        console.log('Backend conversations:', conversations);
         
         if (!Array.isArray(conversations)) {
           console.error('Expected conversations array, got:', conversations);
           return;
         }
         
-        // Convert backend conversations to frontend format
         const frontendConversations = conversations.map(conv => ({
           id: conv.id,
           title: conv.title,
-          messages: [], // Start empty, will load when conversation is selected
-          messageCount: conv.messageCount || 0, // Store message count from backend
+          messages: [], 
+          messageCount: conv.messageCount || 0, 
           createdAt: new Date(conv.created),
           updatedAt: new Date(conv.created)
         }))
@@ -170,12 +159,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     loadConversations()
   }, [])
 
-  // Get active conversation
   const activeConversation = state.conversations.find(
     conv => conv.id === state.activeConversationId
   )
 
-  // Start a new conversation
   const startNewConversation = useCallback(async (): Promise<string> => {
     try {
       const backendConversation = await chatApiClient.createConversation()
@@ -184,7 +171,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         id: backendConversation.id,
         title: backendConversation.title,
         messages: [],
-        messageCount: 0, // New conversation starts with 0 messages
+        messageCount: 0, 
         createdAt: new Date(backendConversation.created),
         updatedAt: new Date(backendConversation.created)
       }
@@ -199,11 +186,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Select a conversation and load its messages
   const selectConversation = useCallback(async (conversationId: string | null) => {
     dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversationId })
     
-    // Load messages for the selected conversation if it exists and has no messages
     if (conversationId) {
       const conversation = state.conversations.find(c => c.id === conversationId)
       if (conversation && conversation.messages.length === 0) {
@@ -211,7 +196,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           dispatch({ type: 'SET_IS_THINKING', payload: true })
           const messages = await chatApiClient.getConversationMessages(conversationId)
           
-          // Convert to frontend format
           const frontendMessages = messages.map(msg => ({
             id: msg.id,
             text: msg.text,
@@ -227,7 +211,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }))
           }))
 
-          // Update the conversation with loaded messages
           const updatedConversation = {
             ...conversation,
             messages: frontendMessages
@@ -246,25 +229,19 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.conversations])
 
-  // Delete a conversation
   const deleteConversation = useCallback(async (conversationId: string) => {
     try {
-      // Call backend API to delete conversation
       await chatApiClient.deleteConversation(conversationId);
       
-      // Remove from local state only after successful API call
       dispatch({ type: 'DELETE_CONVERSATION', payload: conversationId });
       
-      // If the deleted conversation was active, clear active conversation
       if (state.activeConversationId === conversationId) {
         dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: null });
       }
       
-      console.log(`✅ Conversation ${conversationId} deleted successfully`);
     } catch (error) {
       console.error('❌ Failed to delete conversation:', error);
-      // Optionally show user error message here
-      throw error; // Re-throw so UI can handle it
+      throw error; 
     }
   }, [state.activeConversationId])
 
@@ -276,7 +253,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     let newConversationCreated = false
 
     try {
-      // Create new conversation if none is active
       if (!conversationId) {
         conversationId = await startNewConversation()
         newConversationCreated = true
@@ -285,10 +261,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
       dispatch({ type: 'SET_IS_THINKING', payload: true })
 
-      // Send message via API
       let apiResponse
       if (attachments && attachments.length > 0) {
-        // Send with attachments - for now, just send the first file
         const firstAttachment = attachments[0];
         if (firstAttachment.file) {
           apiResponse = await chatApiClient.sendFileMessage(conversationId, content.trim(), firstAttachment.file);
@@ -299,8 +273,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         apiResponse = await chatApiClient.sendTextMessage(conversationId, content.trim())
       }
 
-      // Convert backend messages to frontend format
-      console.log('API Response:', apiResponse); // Debug log
       
       if (!apiResponse.userMessage || !apiResponse.assistantMessage) {
         throw new Error('Invalid API response structure');
@@ -336,28 +308,21 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         }))
       }
 
-      console.log('About to add messages to conversation:', conversationId);
-      console.log('New conversation created:', newConversationCreated);
 
-      // Add messages to state using the correct conversationId
-      console.log('Adding user message to conversation:', conversationId, userMessage);
       dispatch({ 
         type: 'ADD_MESSAGE', 
         payload: { conversationId: conversationId!, message: userMessage } 
       })
       
-      console.log('Adding assistant message to conversation:', conversationId, assistantMessage);
       dispatch({ 
         type: 'ADD_MESSAGE', 
         payload: { conversationId: conversationId!, message: assistantMessage } 
       })
 
-      // Update conversation title if this was a new conversation
       if (newConversationCreated) {
         try {
           const titleResponse = await chatApiClient.getRandomTitle()
           
-          // Wait a moment for the state to update, then get the conversation
           setTimeout(() => {
             dispatch({ type: 'UPDATE_CONVERSATION', payload: {
               id: conversationId!,
@@ -369,7 +334,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }})
           }, 100)
           
-          console.log('Updating conversation title to:', titleResponse.title);
         } catch (titleError) {
           console.error('Failed to get title:', titleError)
         }
@@ -378,7 +342,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       console.error('Send message error:', error)
       
-      // More detailed error handling
       let errorMessage = 'Failed to send message. Please try again.'
       
       if (error instanceof Error) {
@@ -392,12 +355,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // Check if it's a connection error
       if (error?.code === 'ERR_NETWORK' || error?.code === 'ECONNREFUSED') {
         errorMessage = 'Cannot connect to server. Please ensure the backend server is running on port 4000.'
       }
       
-      // Check axios error response
       if (error?.response) {
         console.error('Response status:', error.response.status)
         console.error('Response data:', error.response.data)
@@ -414,7 +375,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.activeConversationId, startNewConversation])
 
-  // Chat window actions
   const openChat = useCallback(() => {
     dispatch({ type: 'SET_IS_OPEN', payload: true })
   }, [])
@@ -427,7 +387,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_IS_OPEN', payload: !state.isOpen })
   }, [state.isOpen])
 
-  // Clear error
   const clearError = useCallback(() => {
     dispatch({ type: 'SET_ERROR', payload: null })
   }, [])

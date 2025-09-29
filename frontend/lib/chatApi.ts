@@ -1,7 +1,12 @@
-// Frontend API Client for Backend Communication
 import axios, { AxiosResponse } from "axios";
+import type {
+  BackendConversation,
+  ConversationSummary,
+  BackendMessage,
+  BackendAttachment,
+  PaginatedMessages,
+} from "./apiTypes";
 
-// Fix environment variable handling with fallback
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   (process.env.NODE_ENV === "production"
@@ -15,7 +20,6 @@ console.log(
   process.env.NEXT_PUBLIC_API_URL
 );
 
-// Add production warning
 if (
   process.env.NODE_ENV === "production" &&
   API_BASE_URL.includes("localhost")
@@ -24,14 +28,13 @@ if (
 }
 
 const api = axios.create({
-  baseURL: `${API_BASE_URL}/api`, // Add /api prefix
+  baseURL: `${API_BASE_URL}/api`,
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Response interceptors for error handling
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     console.log(
@@ -52,49 +55,12 @@ api.interceptors.response.use(
   }
 );
 
-// Types matching backend
-export interface BackendConversation {
-  id: string;
-  title: string;
-  created: string;
-  messages: BackendMessage[];
-}
-
-export interface ConversationSummary {
-  id: string;
-  title: string;
-  created: string;
-  messageCount?: number; // Add message count from backend
-  lastMessage?: BackendMessage;
-}
-
-export interface BackendMessage {
-  id: string;
-  text: string;
-  sender: "user" | "assistant";
-  type: "text" | "image" | "audio" | "file";
-  timestamp: string;
-  attachments?: BackendAttachment[];
-}
-
-export interface BackendAttachment {
-  id: string;
-  name: string;
-  type: "image" | "audio" | "file";
-  url: string;
-  size: number;
-  mimeType: string;
-}
-
-// API Client
 export const chatApiClient = {
-  // Conversations
   async getConversations(userId?: string): Promise<ConversationSummary[]> {
     const url = userId
       ? `/chat/conversations?userId=${userId}`
       : "/chat/conversations";
     const response = await api.get(url);
-    // Handle both direct data and wrapped response
     const conversations = response.data.success
       ? response.data.data
       : response.data;
@@ -108,7 +74,6 @@ export const chatApiClient = {
     const response = await api.get(
       `/chat/messages?conversationId=${conversationId}`
     );
-    // Backend returns { success, data: { items, nextCursor } }
     const data = response.data.success ? response.data.data : response.data;
     return data.items || data || [];
   },
@@ -117,13 +82,11 @@ export const chatApiClient = {
     // If no title provided, get one from the /title endpoint
     if (!title) {
       try {
-        const titleResponse = await import("./api").then((module) =>
-          module.getTitleFromEndpoint()
-        );
-        title = titleResponse.title;
+        const resp = await api.get("/chat/title");
+        title = resp.data.title || "New Chat";
       } catch (error) {
-        console.error("Failed to get title from endpoint:", error);
-        title = "New Chat"; // fallback
+        console.error("Failed to get title from /chat/title endpoint:", error);
+        title = "New Chat";
       }
     }
 
@@ -158,7 +121,7 @@ export const chatApiClient = {
     conversationId: string,
     limit: number = 50,
     cursor?: string
-  ) {
+  ): Promise<PaginatedMessages> {
     const params = new URLSearchParams({
       conversationId,
       limit: limit.toString(),
@@ -166,10 +129,9 @@ export const chatApiClient = {
     if (cursor) params.set("cursor", cursor);
 
     const response = await api.get(`/chat/messages?${params}`);
-    return response.data.data; // { items: Message[], nextCursor?: string }
+    return response.data.data;
   },
 
-  // Send message (text)
   async sendTextMessage(
     conversationId: string,
     text: string
@@ -189,7 +151,6 @@ export const chatApiClient = {
         throw new Error(response.data.message || "Server returned error");
       }
 
-      // Validate response structure
       if (
         !response.data.data?.userMessage ||
         !response.data.data?.assistantMessage
@@ -198,7 +159,6 @@ export const chatApiClient = {
         throw new Error("Invalid response structure from server");
       }
 
-      // Backend returns { success, data: { userMessage, assistantMessage }, message }
       return response.data.data;
     } catch (error: any) {
       console.error("sendTextMessage error:", error);
@@ -210,7 +170,6 @@ export const chatApiClient = {
     }
   },
 
-  // Send message with file
   async sendFileMessage(
     conversationId: string,
     text: string,
@@ -237,7 +196,6 @@ export const chatApiClient = {
         throw new Error(response.data.message || "Server returned error");
       }
 
-      // Validate response structure
       if (
         !response.data.data?.userMessage ||
         !response.data.data?.assistantMessage
@@ -246,7 +204,6 @@ export const chatApiClient = {
         throw new Error("Invalid response structure from server");
       }
 
-      // Backend returns { success, data: { userMessage, assistantMessage }, message }
       return response.data.data;
     } catch (error: any) {
       console.error("sendFileMessage error:", error);
@@ -258,7 +215,6 @@ export const chatApiClient = {
     }
   },
 
-  // Utility endpoints
   async getRandomTitle(): Promise<{ title: string }> {
     const response = await api.get("/chat/title");
     return response.data;

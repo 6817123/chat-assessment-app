@@ -11,12 +11,9 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL:
       process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
-    NEXT_PUBLIC_SOCKET_URL:
-      process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000',
   },
 
   async rewrites() {
-    // استخدم rewrite المحلي فقط أثناء التطوير
     if (!isProd) {
       return [
         {

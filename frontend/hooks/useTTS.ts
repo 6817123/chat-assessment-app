@@ -44,10 +44,8 @@ export function useTTS(): UseTTSReturn {
       setVoices(availableVoices);
     };
 
-    // Load voices immediately
     loadVoices();
 
-    // Some browsers load voices asynchronously
     if (speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = loadVoices;
     }
@@ -64,25 +62,20 @@ export function useTTS(): UseTTSReturn {
   ): SpeechSynthesisVoice | null => {
     if (voices.length === 0) return null;
 
-    // Detect the language of the text automatically
     const detectedLang = detectLanguage(text);
 
-    // Find the best voice for the detected language
     return findBestVoice(voices, detectedLang);
   };
 
   const getPreferredVoice = (): SpeechSynthesisVoice | null => {
     if (voices.length === 0) return null;
 
-    // Try to find a voice that matches the current language (fallback method)
     const languageCode = language === "ar" ? "ar" : "en";
 
-    // First, look for exact language match
     let preferredVoice = voices.find((voice) =>
       voice.lang.toLowerCase().startsWith(languageCode)
     );
 
-    // If no exact match, try to find default voice for language
     if (!preferredVoice && language === "ar") {
       preferredVoice = voices.find(
         (voice) =>
@@ -97,7 +90,6 @@ export function useTTS(): UseTTSReturn {
       );
     }
 
-    // Fallback to first available voice
     return preferredVoice || voices[0] || null;
   };
 
@@ -118,44 +110,34 @@ export function useTTS(): UseTTSReturn {
       return Promise.resolve();
     }
 
-    // Wait for voices to load if they haven't loaded yet
     await waitForVoices();
 
     return new Promise((resolve, reject) => {
       try {
-        // Cancel any ongoing speech first and wait a bit
         speechSynthesis.cancel();
 
-        // Small delay to ensure cancellation is processed
         setTimeout(() => {
           const utterance = new SpeechSynthesisUtterance(text);
 
-          // Detect language of the text and get appropriate voice
           const detectedLang = detectLanguage(text);
           const voiceConfig = getVoiceConfig(detectedLang);
 
-          // Set voice based on detected language (prioritize text language over user preference)
           const voice = options.voice || getPreferredVoiceForText(text);
           if (voice) {
             utterance.voice = voice;
           }
 
-          // Set speech parameters
-          utterance.rate = options.rate ?? 0.9; // Slightly slower for better clarity
+          utterance.rate = options.rate ?? 0.9;
           utterance.pitch = options.pitch ?? 1.0;
           utterance.volume = options.volume ?? 0.8;
 
-          // Set language based on detected text language (not app language)
           utterance.lang = voiceConfig.locale;
 
-          // Track if speech ended normally
           let hasEnded = false;
 
-          // Event listeners
           utterance.onstart = () => {
             setIsSpeaking(true);
             setError(null);
-            // Log the detected language for debugging
             console.log(
               `TTS started for ${detectedLang} text: "${text.substring(0, 50)}${
                 text.length > 50 ? "..." : ""
@@ -176,13 +158,11 @@ export function useTTS(): UseTTSReturn {
               hasEnded = true;
               setIsSpeaking(false);
 
-              // Don't treat certain errors as serious - they're normal when user cancels or switches
               if (event.error === "canceled" || event.error === "not-allowed") {
-                resolve(); // Resolve normally for these "soft" errors
+                resolve();
                 return;
               }
 
-              // For interrupted or synthesis-failed errors, try to resume
               if (
                 event.error === "interrupted" ||
                 event.error === "synthesis-failed"
@@ -190,11 +170,10 @@ export function useTTS(): UseTTSReturn {
                 console.log(
                   "TTS interrupted, will retry automatically on next message"
                 );
-                resolve(); // Don't show error for interruptions
+                resolve();
                 return;
               }
 
-              // Only treat serious errors as actual errors
               const errorMessage = `Speech synthesis error: ${event.error}`;
               setError(errorMessage);
               reject(new Error(errorMessage));
@@ -209,10 +188,8 @@ export function useTTS(): UseTTSReturn {
             setIsSpeaking(true);
           };
 
-          // Start speaking
           speechSynthesis.speak(utterance);
 
-          // Fallback timeout - if speech hasn't started in 10 seconds, resolve
           setTimeout(() => {
             if (!hasEnded && !speechSynthesis.speaking) {
               hasEnded = true;
@@ -220,7 +197,7 @@ export function useTTS(): UseTTSReturn {
               resolve();
             }
           }, 10000);
-        }, 100); // 100ms delay after cancel
+        }, 100);
       } catch (err) {
         setIsSpeaking(false);
         const errorMessage =
@@ -231,7 +208,6 @@ export function useTTS(): UseTTSReturn {
     });
   };
 
-  // Helper function to wait for voices to load
   const waitForVoices = (): Promise<void> => {
     return new Promise((resolve) => {
       if (speechSynthesis.getVoices().length > 0) {

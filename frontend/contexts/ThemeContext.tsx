@@ -16,11 +16,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const settings = getSettings()
     return {
       theme: settings.theme,
-      resolvedTheme: 'light' // Will be updated after mount
+      resolvedTheme: 'light' 
     }
   })
 
-  // Function to get system theme preference
   const getSystemTheme = (): 'light' | 'dark' => {
     if (typeof window !== 'undefined' && window.matchMedia) {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -28,7 +27,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return 'light'
   }
 
-  // Function to resolve the actual theme based on setting
   const resolveTheme = (theme: 'light' | 'dark' | 'system'): 'light' | 'dark' => {
     if (theme === 'system') {
       return getSystemTheme()
@@ -36,7 +34,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return theme
   }
 
-  // Update resolved theme
   const updateResolvedTheme = (theme: 'light' | 'dark' | 'system') => {
     const resolved = resolveTheme(theme)
     setState(prev => ({
@@ -45,7 +42,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       resolvedTheme: resolved
     }))
     
-    // Apply theme to document
     if (typeof document !== 'undefined') {
       const root = document.documentElement
       root.classList.remove('light', 'dark')
@@ -54,7 +50,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Listen to system theme changes
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -67,7 +62,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     mediaQuery.addEventListener('change', handleChange)
     
-    // Initial theme application
     updateResolvedTheme(state.theme)
 
     return () => {
@@ -79,12 +73,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     updateSetting('theme', theme)
     updateResolvedTheme(theme)
     
-    // Dispatch custom event to notify other components
     window.dispatchEvent(new Event('themeChanged'))
   }
 
   const toggleTheme = () => {
-    // Toggle between dark and light only for better UX in header
     const nextTheme = state.theme === 'dark' ? 'light' : 'dark'
     setTheme(nextTheme)
   }
