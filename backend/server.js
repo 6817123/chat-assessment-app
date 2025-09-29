@@ -31,7 +31,6 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
@@ -70,14 +69,10 @@ app.use('*', (req, res) => {
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`CORS origin: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}`);
 });
 
 function graceful(exitCode = 0) {
-  console.log('Shutting down gracefully...');
   server.close(() => {
-    console.log('HTTP server closed');
     process.exit(exitCode);
   });
   // Fallback timeout

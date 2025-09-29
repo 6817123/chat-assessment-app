@@ -13,13 +13,6 @@ const API_BASE_URL =
     ? "https://chat-assessment-app-production.up.railway.app"
     : "http://localhost:4000");
 
-console.log("🔧 API_BASE_URL set to:", API_BASE_URL);
-console.log("🔧 NODE_ENV:", process.env.NODE_ENV);
-console.log(
-  "🔧 NEXT_PUBLIC_API_URL from env:",
-  process.env.NEXT_PUBLIC_API_URL
-);
-
 if (
   process.env.NODE_ENV === "production" &&
   API_BASE_URL.includes("localhost")
@@ -37,11 +30,6 @@ const api = axios.create({
 
 api.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log(
-      `✅ API Success: ${response.config.method?.toUpperCase()} ${
-        response.config.baseURL
-      }${response.config.url}`
-    );
     return response;
   },
   (error) => {
@@ -64,7 +52,6 @@ export const chatApiClient = {
     const conversations = response.data.success
       ? response.data.data
       : response.data;
-    console.log("API getConversations response:", conversations);
     return conversations || [];
   },
 
@@ -108,8 +95,6 @@ export const chatApiClient = {
           response.data.message || "Failed to delete conversation"
         );
       }
-
-      console.log(`✅ Conversation ${id} deleted successfully`);
     } catch (error) {
       console.error("❌ Error deleting conversation:", error);
       throw error;
@@ -144,8 +129,6 @@ export const chatApiClient = {
         text,
         conversationId,
       });
-
-      console.log("sendTextMessage raw response:", response.data); // Debug log
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Server returned error");
@@ -189,8 +172,6 @@ export const chatApiClient = {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      console.log("sendFileMessage raw response:", response.data); // Debug log
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Server returned error");

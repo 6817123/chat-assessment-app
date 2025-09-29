@@ -111,7 +111,6 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                   onClick={() => {
                     speak(message.text).catch(error => {
                       // Silently handle TTS errors for manual clicks too
-                      console.log('TTS manual play failed:', error.message)
                     })
                   }}
                   className={cn(

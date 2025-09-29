@@ -79,8 +79,6 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
     
     case 'ADD_MESSAGE': {
       const { conversationId, message } = action.payload
-      console.log('ADD_MESSAGE reducer - conversationId:', conversationId, 'message:', message);
-      console.log('Current conversations:', state.conversations.map(c => ({ id: c.id, messageCount: c.messages.length })));
       
       const updated = state.conversations.map(conv => {
         if (conv.id === conversationId) {
@@ -90,7 +88,6 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
             messageCount: conv.messageCount !== undefined ? conv.messageCount + 1 : conv.messages.length + 1,
             updatedAt: new Date()
           }
-          console.log('Updated conversation:', updatedConv.id, 'messages count:', updatedConv.messages.length);
           return updatedConv;
         }
         return conv
@@ -130,7 +127,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const loadConversations = async () => {
       try {
         dispatch({ type: 'SET_IS_THINKING', payload: true })
-        console.log('Loading conversations...');
         const conversations = await chatApiClient.getConversations()
         
         if (!Array.isArray(conversations)) {
@@ -256,7 +252,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       if (!conversationId) {
         conversationId = await startNewConversation()
         newConversationCreated = true
-        console.log('Created new conversation with ID:', conversationId);
       }
 
       dispatch({ type: 'SET_IS_THINKING', payload: true })

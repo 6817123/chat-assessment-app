@@ -138,11 +138,6 @@ export function useTTS(): UseTTSReturn {
           utterance.onstart = () => {
             setIsSpeaking(true);
             setError(null);
-            console.log(
-              `TTS started for ${detectedLang} text: "${text.substring(0, 50)}${
-                text.length > 50 ? "..." : ""
-              }"`
-            );
           };
 
           utterance.onend = () => {
@@ -167,9 +162,6 @@ export function useTTS(): UseTTSReturn {
                 event.error === "interrupted" ||
                 event.error === "synthesis-failed"
               ) {
-                console.log(
-                  "TTS interrupted, will retry automatically on next message"
-                );
                 resolve();
                 return;
               }
