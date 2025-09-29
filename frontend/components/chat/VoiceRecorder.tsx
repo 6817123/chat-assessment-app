@@ -33,7 +33,6 @@ export function VoiceRecorder({
     error
   } = useVoiceRecorder()
 
-  // Handle recording completion
   useEffect(() => {
     if (recordingState === 'stopped' && audioBlob && onRecordingComplete) {
       onRecordingComplete(audioBlob, duration)

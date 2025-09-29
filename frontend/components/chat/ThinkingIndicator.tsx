@@ -12,7 +12,6 @@ export function ThinkingIndicator({ className }: ThinkingIndicatorProps) {
   const { t } = useLanguage()
   const { settings } = useSettings()
 
-  // Don't render if thinking indicator is disabled in settings
   if (!settings.features.showThinking) {
     return null
   }

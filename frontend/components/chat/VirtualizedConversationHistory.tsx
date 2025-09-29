@@ -48,7 +48,6 @@ export function VirtualizedConversationHistory({
         await deleteConversation(conversationId)
       } catch (error) {
         console.error('Failed to delete conversation:', error)
-        // Show user-friendly error message
         alert(t('chat.error.delete') || 'Failed to delete conversation. Please try again.')
       }
     }

@@ -50,7 +50,7 @@ export function MessageInput() {
     // Auto-resize textarea
     const textarea = e.target
     textarea.style.height = 'auto'
-    const maxHeight = 120 // 5 lines approximately
+    const maxHeight = 120 
     textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px'
     textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'scroll' : 'hidden'
   }
@@ -80,7 +80,7 @@ export function MessageInput() {
           size: file.size,
           mimeType: file.type,
           preview,
-          file // Store the original file
+          file 
         }
 
         newAttachments.push(attachment)
@@ -89,7 +89,6 @@ export function MessageInput() {
       }
     }
 
-    // Show errors as toast notifications
     if (errors.length > 0) {
       addToast({
         type: 'error',
@@ -102,7 +101,6 @@ export function MessageInput() {
     if (newAttachments.length > 0) {
       setAttachments(prev => [...prev, ...newAttachments])
       
-      // Show success message for valid files
       addToast({
         type: 'success',
         title: t('success.filesAdded'),
@@ -112,12 +110,10 @@ export function MessageInput() {
     }
   }, [addToast, t])
 
-  // Listen for file drop events from ChatWindow
   useEffect(() => {
     const handleFilesDrop = (event: CustomEvent) => {
       const files = event.detail.files as File[]
       if (files && files.length > 0) {
-        // Call handleFileSelect directly with the files array
         handleFileSelect(files)
       }
     }
@@ -131,7 +127,7 @@ export function MessageInput() {
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       handleFileSelect(e.target.files)
-      e.target.value = '' // Reset input
+      e.target.value = '' 
     }
   }
 

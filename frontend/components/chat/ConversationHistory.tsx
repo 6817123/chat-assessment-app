@@ -176,4 +176,4 @@ export function ConversationHistory({ onConversationSelect, className }: Convers
       </div>
     </div>
   )
-}
+} 
